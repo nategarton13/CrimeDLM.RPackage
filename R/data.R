@@ -2,9 +2,12 @@
 #'
 #' Add details about this data set here
 #'
-#' @format A \code{data.frame} with X rows and Y variables:
+#' @format A \code{data.frame} with 720 rows and 4 variables:
 #' \describe{
-#'   \item{variable1}{variable 1 description}
+#'   \item{year}{4 digit year}
+#'   \item{month}{abbreviation for month of observation}
+#'   \item{type}{type of crime}
+#'   \item{count}{number of reported crimes}
 #' }
 #'
 #' @source \url{}

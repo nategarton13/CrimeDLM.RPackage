@@ -1,9 +1,9 @@
 Package: CrimeDLM.RPackage
 Title: Methods for analysis of crime data using dynamic linear models
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: c(
     person("Nate", "Garton", email = "nate.garton13@gmail.com", role = c("aut", "cre")),
-    person("Jarad", "Niemi", email = "niemi@iastate.edu", role = "ctb")
+    person("Jarad", "Niemi", email = "niemi@iastate.edu", role = "ctb"))
 Description: Contains data from Chicago on crime and methods for analyzing that
     data using dynamic linear models when the data are aggregated in both space
     and time.
@@ -11,3 +11,4 @@ Depends: R (>= 3.0)
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 6.0.1
