@@ -12,3 +12,5 @@ License: GPL-2
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
+Imports: dlm (>= 1.1.4),
+    rstan (>= 2.17.2)
