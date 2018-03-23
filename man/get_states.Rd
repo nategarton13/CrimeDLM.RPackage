@@ -25,8 +25,8 @@ The function requires at least two crime types.}
 Returns a three dimensional array where dimension one corresponds to the sample/iteration,
 dimension two corresponds to the number of time points, and dimension three corresponds to the parameter.
 Parameters are in the following order: \eqn{\mu_1,\mu_2,...,\beta_1, \beta_2,...}. The ordering of a given set of parameters,
-say \eqn{mu}, is the ordering of the types of crimes specified by the \code{crime_types} argument. 
-After \eqn{beta} parameters, the remainder are needed for the construction of seasonal effects.
+say \eqn{\mu}, is the ordering of the types of crimes specified by the \code{crime_types} argument. 
+After \eqn{\beta} parameters, the remainder are needed for the construction of seasonal effects.
 }
 \description{
 \code{get_states} uses the \code{dlm} package to sample the latent states via the
@@ -36,6 +36,6 @@ The same arguments should be supplied for parameters shared by \code{get_states}
 \examples{
  \dontrun{
  cov_samples <- run_mcmc(data = chicago, chains = 2, adapt_delta = 0.8)
- state_samples <- get_states()
+ state_samples <- get_states(mcmc_samples = cov_samples$samples, data = chicago)
  }
 }

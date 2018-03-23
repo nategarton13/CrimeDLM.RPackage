@@ -47,3 +47,9 @@ and latent state covariance parameters in the dynamic linear model specificied i
 The full chicago crime dataset must be passed to the \code{data} argument. Other parameter arguments dictate
 the subset of the data on which the analysis is performed as well as details of the MCMC to be passed to \code{rstan::sampling}.
 }
+\examples{
+ \dontrun{
+ cov_samples <- run_mcmc(data = chicago, chains = 2, adapt_delta = 0.8)
+ }
+
+}

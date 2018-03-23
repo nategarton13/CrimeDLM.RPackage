@@ -22,7 +22,7 @@
 #' @examples
 #'  \dontrun{
 #'  cov_samples <- run_mcmc(data = chicago, chains = 2, adapt_delta = 0.8)
-#'  state_samples <- get_states()
+#'  state_samples <- get_states(mcmc_samples = cov_samples$samples, data = chicago)
 #'  }
 
 get_states <- function(mcmc_samples, data, harmonics = 4, crime_types = c("burglary","robbery"), initial_year = 2012, final_year = 2016)

@@ -29,7 +29,7 @@
 #'  See Stan documentation for \code{lp__}.
 #'  
 #' @export
-#' @example
+#' @examples
 #'  \dontrun{
 #'  cov_samples <- run_mcmc(data = chicago, chains = 2, adapt_delta = 0.8)
 #'  }
