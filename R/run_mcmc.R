@@ -28,9 +28,10 @@
 #'  \code{sigma_error_mat} corresponds to error covariance matrices.
 #'  See Stan documentation for \code{lp__}.
 #'  
-#'  @examples 
+#' @export
+#' @example
 #'  \dontrun{
-#'  run_mcmc(data = chicago, chains = 2, adapt_delta = 0.8)
+#'  cov_samples <- run_mcmc(data = chicago, chains = 2, adapt_delta = 0.8)
 #'  }
 #' 
 

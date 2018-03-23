@@ -40,11 +40,6 @@ samples. Samples is itself a list where each element is either a two or three di
  \code{sigma_evo_mat} corresponds to evolution covariance matrices,
  \code{sigma_error_mat} corresponds to error covariance matrices.
  See Stan documentation for \code{lp__}.
- 
- @examples 
- \dontrun{
- run_mcmc(data = chicago, chains = 2, adapt_delta = 0.8)
- }
 }
 \description{
 \code{run_mcmc} uses Stan to run a Hamiltonian Monte Carlo algorithm to sample the observation
