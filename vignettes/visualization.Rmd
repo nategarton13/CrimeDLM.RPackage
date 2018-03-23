@@ -1,0 +1,46 @@
+---
+title: "Temporal structure of monthly aggregated counts by type"
+author: "Vignette Author"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r data}
+library("ggplot2")
+library("CrimeDLM.RPackage")
+```
+
+```{r compare_types}
+ggplot(chicago, aes(month, count, 
+                    color = type, linetype = type, group = type)) + 
+  geom_line() + 
+  facet_wrap(~year) + 
+  scale_y_sqrt() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1),
+        legend.position = "bottom")
+```
+
+```{r compare_years}
+ggplot(chicago, aes(month, count, 
+                    color = year, group = year)) + 
+  geom_line() + 
+  facet_wrap(~type) + 
+  scale_y_sqrt() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+
+
