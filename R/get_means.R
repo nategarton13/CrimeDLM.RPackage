@@ -3,19 +3,24 @@
 #' \code{get_means} computes the linear combination of parameters defined to be the data model mean for a given set of sampled states.
 #' 
 #' @param states A three dimensional array of sampled states such as that given by \code{get_states}.
-#' @param harmonics An integer in 1 to 6 specifiying the number of harmonics to model seasonality.
+#' @param harmonics An integer in 1 to 6 specifiying the number of harmonics to model seasonality. 
+#'  Must be consistent with specification in \code{run_mcmc()}.
 #' @param crime_types Character vector specifying the types of crimes to include in the analysis.
 #' The function requires at least two crime types.
 #' 
-#' @return Returns a three dimensional array where dimension one corresponds to the sample/iteration,
+#' @return Returns a list with two objects: ts_means and crime_types. 
+#' ts_means is a three dimensional array where dimension one corresponds to the sample/iteration,
 #' dimension two corresponds to the number of time points, and dimension three corresponds to the crime type.
+#' crime_types returns the crime_types argument specified in the function. This serves as a reminder of
+#' the ordering of crime types, which is important for interpreting the ts_means output 
+#' as well as making sure that the order of crime types is consistent between other functions.
 #' 
 #' @export
 #' @examples
 #'  \dontrun{
 #'  cov_samples <- run_mcmc(data = chicago, chains = 2, adapt_delta = 0.8)
 #'  state_samples <- get_states(mcmc_samples = cov_samples$samples, data = chicago)
-#'  ts_means <- get_means(states = state_samples)
+#'  ts_means <- get_means(states = state_samples$state_samples)
 #'  }
 
 get_means <- function(states, harmonics = 4, crime_types = c("burglary","robbery"))
@@ -45,7 +50,7 @@ get_means <- function(states, harmonics = 4, crime_types = c("burglary","robbery
   }
   
   dimnames(x = y.mean.samples.stan)[[3]] <- crime_types
-  return(y.mean.samples.stan)
+  return(list("ts_means" = y.mean.samples.stan, "crime_types" = crime_types))
   
   ## returns array with 
     # dim 1 = mcmc samples
@@ -53,5 +58,3 @@ get_means <- function(states, harmonics = 4, crime_types = c("burglary","robbery
     # dim 3 = crime type
   
 }
-
-# test.means <- get.means(states = test.states, harmonics = 4)

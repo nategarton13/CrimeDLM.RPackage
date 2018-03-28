@@ -2,5 +2,7 @@
 
 export(dlm_analysis)
 export(get_means)
+export(get_seasonality)
+export(get_smoothmeans)
 export(get_states)
 export(run_mcmc)

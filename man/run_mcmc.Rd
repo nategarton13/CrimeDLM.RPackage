@@ -29,8 +29,11 @@ The function requires at least two crime types.}
 \item{final_year}{Integer in 2008 to 2016 specifying the last year in the analysis.}
 }
 \value{
-Returns a list of two objects: samples and summary. Summary gives a summary of the
-samples. Samples is itself a list where each element is either a two or three dimensional array
+Returns a list of three objects: samples, summary, and crime_types. summary gives a summary of the
+samples. crime_types returns the crime_types argument specified in the function. This serves as a reminder of
+ the ordering of crime types, which is important for interpreting covariance matrix output 
+ as well as making sure that the order of crime types is consistent between other functions.
+ samples is itself a list where each element is either a two or three dimensional array
  containing all of the samples of a given parameter. The first dimension of the array always
  corresponds to the sample/iteration. Parameter names work as follows: 
  \code{omega_evo} corresponds to evolution correlation matrices,

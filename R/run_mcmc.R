@@ -16,8 +16,11 @@
 #' @param initial_year Integer in 2007 to 2015 specifying the first year in the analysis.
 #' @param final_year Integer in 2008 to 2016 specifying the last year in the analysis.
 #' 
-#' @return Returns a list of two objects: samples and summary. Summary gives a summary of the
-#' samples. Samples is itself a list where each element is either a two or three dimensional array
+#' @return Returns a list of three objects: samples, summary, and crime_types. summary gives a summary of the
+#' samples. crime_types returns the crime_types argument specified in the function. This serves as a reminder of
+#'  the ordering of crime types, which is important for interpreting covariance matrix output 
+#'  as well as making sure that the order of crime types is consistent between other functions.
+#'  samples is itself a list where each element is either a two or three dimensional array
 #'  containing all of the samples of a given parameter. The first dimension of the array always
 #'  corresponds to the sample/iteration. Parameter names work as follows: 
 #'  \code{omega_evo} corresponds to evolution correlation matrices,
@@ -134,6 +137,6 @@ run_mcmc <- function(data, harmonics = 4, chains = 3, iter = 2000, warmup = 1000
   stan_samples = rstan::sampling(object = m, data = list(p = p, n=nrow(y), y=t(y), q = q, m0 = m0, C0 = C0, FF = t(mod.multi$FF), GG = mod.multi$GG), iter = iter, warmup = warmup, chains = chains, control = list(adapt_delta = adapt_delta))
   
   ## return extracted stan samples
-  return(list("samples" = rstan::extract(stan_samples), "summary" = summary(stan_samples)))
+  return(list("samples" = rstan::extract(stan_samples), "summary" = summary(stan_samples), "crime_types" = crime_types))
 }
 

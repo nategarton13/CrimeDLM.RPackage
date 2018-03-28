@@ -6,17 +6,22 @@
 #' 
 #' @param mcmc_samples A list of parameter samples with the same names and classes as those produced by \code{run_mcmc}.
 #' @param data The full Chicago crime dataset as given by \code{chicago}.
-#' @param harmonics An integer in 1 to 6 specifiying the number of harmonics to model seasonality.
+#' @param harmonics An integer in 1 to 6 specifiying the number of harmonics to model seasonality. 
+#'  Must be consistent with specification in \code{run_mcmc()}.
 #' @param crime_types Character vector specifying the types of crimes to include in the analysis.
 #' The function requires at least two crime types.
 #' @param initial_year Integer in 2007 to 2015 specifying the first year in the analysis.
 #' @param final_year Integer in 2008 to 2016 specifying the last year in the analysis.
 #' 
-#' @return Returns a three dimensional array where dimension one corresponds to the sample/iteration,
+#' @return Returns a list with two objects: state_samples and crime_types.
+#' state_samples is a three dimensional array where dimension one corresponds to the sample/iteration,
 #' dimension two corresponds to the number of time points, and dimension three corresponds to the parameter.
 #' Parameters are in the following order: \eqn{\mu_1,\mu_2,...,\beta_1, \beta_2,...}. The ordering of a given set of parameters,
 #' say \eqn{\mu}, is the ordering of the types of crimes specified by the \code{crime_types} argument. 
 #' After \eqn{\beta} parameters, the remainder are needed for the construction of seasonal effects.
+#' crime_types returns the crime_types argument specified in the function. This serves as a reminder of
+#' the ordering of crime types, which is important for interpreting the state_samples output 
+#' as well as making sure that the order of crime types is consistent between other functions.
 #' 
 #' @export
 #' @examples
@@ -96,7 +101,7 @@ get_states <- function(mcmc_samples, data, harmonics = 4, crime_types = c("burgl
   ## sample the states
   print("This may take a while... See progress bar.")
   state.samples <- sub_get_states(sigma_error_samples = sigma.samples.stan, sigma_evo_samples = sigma.beta.samples.stan, p = p,  q = q, y = y)
-  return(state.samples)
+  return(list("state_samples" = state.samples, "crime_types" = crime_types))
   
   ## every 6 columns correspond to the same single parameter from each crime type
     ## first 6 columns are the smoothed means, mu
