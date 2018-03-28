@@ -1,0 +1,100 @@
+---
+title: "Example analysis of monthly robberies and burglaries in Chicago from 2012-2016"
+author: "Nate Garton"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r data}
+library("ggplot2")
+library("CrimeDLM.RPackage")
+library("rstan")
+library("Rcpp")
+```
+
+# Introduction
+The purpose of this document is to provide the code to perform a limited dynamic linear model analysis of counts of monthly robberies and burglaries in Chicago from 2012-2016. Demonstrations of functions provided in `CrimeDLM.RPackage` will be given, and simultaneously we will show the basic methods by which DLM's can be used to analyze temporal crime data. 
+
+# Model
+## Data Model
+Define $Y_{ct}$ be log of the number of reported incidents of crime type 
+$c\in \{1, \ldots, C\}$ at time $t\in \{1, \ldots, T\}$. 
+For each crime,
+we assumed 
+$Y_{ct} = \mu_{ct} + \phi_{ct} + \epsilon_{ct}$ 
+where $\phi_{ct}$ accounts for periodicity in the data due to systematic
+seasonal variability and 
+$\mu_{ct}$ smoothed (because it does not involve seasonality) mean level of (log) crime reporting.
+For $\mu_{ct}$ we assumed a linear trend model, 
+i.e. $\mu_{ct} = \mu_{c,t-1} + \beta_{c,t-1}$ and 
+$\beta_{ct} = \beta_{c,t-1} + \delta_{ct}$,
+were $\beta_{ct}$ represents the difference in mean level from time $t$ to time
+$t+1$ and $\delta_{ct}$ represents the change in this difference from time $t$ 
+to time $t+1$. Lastly, $(\epsilon_{1t}, \epsilon_{2t})^{\top} \stackrel{iid}{\sim} N(0,\Sigma_{\epsilon})$ and  $(\delta_{1t}, \delta_{2t})^{\top} \stackrel{iid}{\sim} N(0,\Sigma_{\delta})$, where each $\epsilon_{ct}$ is independent of every $\delta_{ct}$.
+
+## Prior 
+We chose to use independent $Ca^{+}(0,1)$ priors on the evolution and residual standard deviations, but we then put independent LKJ priors with parameter $\nu = 1$ on the correlation matrices for the residual and evolution vectors, $\Omega_\epsilon$ and $\Omega_\delta$, respectively. The density function of the LKJ distribution is, up to a constant of proportionality, $\text{Lkj}(\Sigma|\nu) \propto |\Sigma|^{\nu - 1}$ where $\nu > 0$. The LKJ distribution with $\nu = 1$ is a distribution that is uniform on all correlation matrices of the given dimension. Also, the initial states were assumed to be iid $N(0,10^7)$.
+
+# Analysis of correlations between crimes
+
+## Get posterior samples of covariance 
+```{r run_mcmc, message=FALSE}
+cov_samples <- run_mcmc(data = chicago, chains = 2, adapt_delta = 0.8)
+```
+
+In order to understand whether there is a relationship in how robberies and burglaries trend over time, we can examine the posterior distribution of the evolution correlation.
+```{r evolution_correlation}
+ggplot() +
+  geom_density(mapping = aes(x = cov_samples$samples$omega_evo[,1,2]), fill = "blue", alpha = 0.5) +
+  xlab("Evolution correlation")
+```
+
+Similarly, we can seek to understand if, on a month to month basis, under or over prediction of robberies and burglaries coincide. This we can do by examining the posterior distribution of the error correlations.
+```{r error_correlation}
+ggplot() +
+  geom_density(mapping = aes(x = cov_samples$samples$omega_error[,1,2]), fill = "red", alpha = 0.5) +
+  xlab("Error correlation")
+```
+
+
+# Get posterior samples of the states
+Now we must sample the latent states. It is important that the order of the crime types given in the `run_mcmc()` function matches that of future functions.
+```{r sample_states}
+state_samples <- get_states(mcmc_samples = cov_samples$samples, data = chicago, crime_types = cov_samples$crime_types)
+```
+
+# Analysis of the smoothed time series means
+We have an idea of the relationship between monthly burglaries and robberies over this time period, but we would like to know what the trends for each of these crimes actually look like. We can do this by plotting the smoothed time series means. These correspond to the $\mu_{ct}$ parameters in the model.
+```{r smoothed_means}
+smoothmeans <- get_smoothmeans(states = state_samples$state_samples, crime_types = state_samples$crime_types)
+
+## create data frame for plotting 
+df <- expand.grid(unique(chicago$month), c(2012:2016),stringsAsFactors = FALSE)
+df$date <- as.Date(paste(df[,1],df[,2],15, sep = "-"), format = "%b-%Y-%d")
+df <- rbind(df,df)
+df$type <- rep(c(state_samples$crime_types), each = nrow(df)/2)
+df$mean <- c(apply(X = smoothmeans$smoothmeans[,-61,1], MARGIN = 2, FUN = mean), apply(X = smoothmeans$smoothmeans[,-61,2], MARGIN = 2, FUN = mean))
+df$lower <- c(apply(X = smoothmeans$smoothmeans[,-61,1], MARGIN = 2, FUN = quantile, probs = 0.025), apply(X = smoothmeans$smoothmeans[,-61,2], MARGIN = 2, FUN = quantile, probs = 0.025))
+df$upper <- c(apply(X = smoothmeans$smoothmeans[,-61,1], MARGIN = 2, FUN = quantile, probs = 0.975), apply(X = smoothmeans$smoothmeans[,-61,2], MARGIN = 2, FUN = quantile, probs = 0.975))
+
+ggplot(df) +
+  geom_ribbon(aes(x=date, ymin = exp(lower), ymax = exp(upper), fill = type), alpha = 0.5) +
+  geom_line(aes(x = date, y = exp(mean), colour = type), size = 1.3) +
+  # scale_fill_manual(values = cbbPalette) +
+  # scale_colour_manual(values = cbbPalette) +
+  ylab("Crime count") +
+  xlab("Month") +
+  theme_bw() +
+  theme(text = element_text(size = 12))
+```
