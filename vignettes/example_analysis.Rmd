@@ -28,7 +28,7 @@ The purpose of this document is to provide the code to perform a limited dynamic
 
 # Model
 ## Data Model
-Define $Y_{ct}$ be log of the number of reported incidents of crime type 
+Define $Y_{ct}$ to be the log of the number of reported incidents of crime type 
 $c\in \{1, \ldots, C\}$ at time $t\in \{1, \ldots, T\}$. 
 For each crime,
 we assumed 
@@ -49,7 +49,7 @@ We chose to use independent $Ca^{+}(0,1)$ priors on the evolution and residual s
 # Analysis of correlations between crimes
 
 ## Get posterior samples of covariance 
-```{r run_mcmc, message=FALSE}
+```{r run_mcmc, message=FALSE, results='hide'}
 cov_samples <- run_mcmc(data = chicago, chains = 2, adapt_delta = 0.8)
 ```
 
@@ -70,12 +70,12 @@ ggplot() +
 
 # Get posterior samples of the states
 Now we must sample the latent states. It is important that the order of the crime types given in the `run_mcmc()` function matches that of future functions.
-```{r sample_states}
+```{r sample_states, results = 'hide', message=FALSE}
 state_samples <- get_states(mcmc_samples = cov_samples$samples, data = chicago, crime_types = cov_samples$crime_types)
 ```
 
 # Analysis of the smoothed time series means
-We have an idea of the relationship between monthly burglaries and robberies over this time period, but we would like to know what the trends for each of these crimes actually look like. We can do this by plotting the smoothed time series means. These correspond to the $\mu_{ct}$ parameters in the model.
+We have an idea of the relationship between monthly burglaries and robberies over this time period, but we would like to know what the trends for each of these crimes actually look like. We can do this by plotting the smoothed time series means. These correspond to the $\mu_{ct}$ parameters in the model. We also plot 95% pointwise credible intervals.
 ```{r smoothed_means}
 smoothmeans <- get_smoothmeans(states = state_samples$state_samples, crime_types = state_samples$crime_types)
 
@@ -84,17 +84,53 @@ df <- expand.grid(unique(chicago$month), c(2012:2016),stringsAsFactors = FALSE)
 df$date <- as.Date(paste(df[,1],df[,2],15, sep = "-"), format = "%b-%Y-%d")
 df <- rbind(df,df)
 df$type <- rep(c(state_samples$crime_types), each = nrow(df)/2)
-df$mean <- c(apply(X = smoothmeans$smoothmeans[,-61,1], MARGIN = 2, FUN = mean), apply(X = smoothmeans$smoothmeans[,-61,2], MARGIN = 2, FUN = mean))
-df$lower <- c(apply(X = smoothmeans$smoothmeans[,-61,1], MARGIN = 2, FUN = quantile, probs = 0.025), apply(X = smoothmeans$smoothmeans[,-61,2], MARGIN = 2, FUN = quantile, probs = 0.025))
-df$upper <- c(apply(X = smoothmeans$smoothmeans[,-61,1], MARGIN = 2, FUN = quantile, probs = 0.975), apply(X = smoothmeans$smoothmeans[,-61,2], MARGIN = 2, FUN = quantile, probs = 0.975))
+df$mean <- c(apply(X = smoothmeans$smoothmeans[,-1,1], MARGIN = 2, FUN = mean), apply(X = smoothmeans$smoothmeans[,-61,2], MARGIN = 2, FUN = mean))
+df$lower <- c(apply(X = smoothmeans$smoothmeans[,-1,1], MARGIN = 2, FUN = quantile, probs = 0.025), apply(X = smoothmeans$smoothmeans[,-61,2], MARGIN = 2, FUN = quantile, probs = 0.025))
+df$upper <- c(apply(X = smoothmeans$smoothmeans[,-1,1], MARGIN = 2, FUN = quantile, probs = 0.975), apply(X = smoothmeans$smoothmeans[,-61,2], MARGIN = 2, FUN = quantile, probs = 0.975))
 
 ggplot(df) +
   geom_ribbon(aes(x=date, ymin = exp(lower), ymax = exp(upper), fill = type), alpha = 0.5) +
   geom_line(aes(x = date, y = exp(mean), colour = type), size = 1.3) +
-  # scale_fill_manual(values = cbbPalette) +
-  # scale_colour_manual(values = cbbPalette) +
   ylab("Crime count") +
+  xlab("Date") + 
+  scale_x_date(labels = date_format("%b"), date_breaks = "1 year", date_labels = "%b-%Y")
+```
+
+
+# Analysis of seasonality
+It may also be of interest to examine and compare any periodicity in the behavior of crime time series. The seasonal effects correspond to the $\phi_{ct}$ parameters in the model. We plot the estimated posterior means as well as 95% pointwise credible intervals.
+```{r seasonality}
+seasonality <- get_seasonality(states = state_samples$state_samples, harmonics = 4, crime_types = state_samples$crime_types)
+
+df_seasonality <- df[c(1:12,61:72),3:4]
+df_seasonality$mean <- c(apply(X = seasonality$seasonal_effects[,c(2:13),1], MARGIN = 2, FUN = mean), apply(X = seasonality$seasonal_effects[,c(2:13),2], MARGIN = 2, FUN = mean))
+df_seasonality$lower <- c(apply(X = seasonality$seasonal_effects[,c(2:13),1], MARGIN = 2, FUN = quantile, probs = 0.025), apply(X = seasonality$seasonal_effects[,c(2:13),2], MARGIN = 2, FUN = quantile, probs = 0.025))
+df_seasonality$upper <- c(apply(X = seasonality$seasonal_effects[,c(2:13),1], MARGIN = 2, FUN = quantile, probs = 0.975), apply(X = seasonality$seasonal_effects[,c(2:13),2], MARGIN = 2, FUN = quantile, probs = 0.975))
+
+ggplot(df_seasonality) +
+  geom_ribbon(aes(x = date, ymin = exp(lower), ymax = exp(upper), fill = type), alpha = 0.5) +
+  geom_line(aes(x = date, y = exp(mean), colour = type), size = 1.3) +
+  ylab("Multiplicative effect \n on crime count") +
   xlab("Month") +
-  theme_bw() +
-  theme(text = element_text(size = 12))
+  scale_x_date(labels = date_format("%b"), date_breaks = "1 month", date_labels = "%b")
+```
+
+
+# Estimated time series means (smoothed means + seasonality)
+The estimated, non-smoothed, time series means may also be of interest.
+
+```{r timeseries_means}
+ts_means <- get_means(states = state_samples$state_samples, harmonics = 4, crime_types = state_samples$crime_types)
+
+df_means <- df[,3:4]
+df_means$mean <- c(apply(X = ts_means$ts_means[,-1,1], MARGIN = 2, FUN = mean), apply(X = ts_means$ts_means[,-61,2], MARGIN = 2, FUN = mean))
+df_means$lower <- c(apply(X = ts_means$ts_means[,-1,1], MARGIN = 2, FUN = quantile, probs = 0.025), apply(X = ts_means$ts_means[,-61,2], MARGIN = 2, FUN = quantile, probs = 0.025))
+df_means$upper <- c(apply(X = ts_means$ts_means[,-1,1], MARGIN = 2, FUN = quantile, probs = 0.975), apply(X = ts_means$ts_means[,-61,2], MARGIN = 2, FUN = quantile, probs = 0.975))
+
+ggplot(df_means) +
+  geom_ribbon(aes(x=date, ymin = exp(lower), ymax = exp(upper), fill = type), alpha = 0.5) +
+  geom_line(aes(x = date, y = exp(mean), colour = type), size = 1.3) +
+  ylab("Crime count") +
+  xlab("Date") +
+  scale_x_date(labels = date_format("%b"), date_breaks = "1 year", date_labels = "%b-%Y")
 ```
