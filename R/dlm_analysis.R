@@ -12,12 +12,13 @@
 #' @details
 #' Provide model and prior specification here.
 #'
-#'
 #' @export
 #' @examples
 #' \dontrun{
 #' dlm_analysis(chicago, list(a=1))
 #' }
+#'
+#'@keywords internal
 #'
 dlm_analysis <- function(data, prior, ...) {
   data.frame(a=1)

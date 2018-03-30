@@ -31,3 +31,4 @@ dlm_analysis(chicago, list(a=1))
 }
 
 }
+\keyword{internal}

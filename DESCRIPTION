@@ -1,6 +1,6 @@
 Package: CrimeDLM.RPackage
 Title: Methods for analysis of crime data using dynamic linear models
-Version: 0.0.3
+Version: 1.0.0
 Authors@R: c(
     person("Nate", "Garton", email = "nate.garton13@gmail.com", role = c("aut", "cre")),
     person("Jarad", "Niemi", email = "niemi@iastate.edu", role = "ctb"))
