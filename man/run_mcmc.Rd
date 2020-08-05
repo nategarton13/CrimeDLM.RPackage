@@ -39,11 +39,11 @@ The function requires at least two crime types.}
 \value{
 Returns a list of three objects: samples, summary, and crime_types. summary gives a summary of the
 samples. crime_types returns the crime_types argument specified in the function. This serves as a reminder of
- the ordering of crime types, which is important for interpreting covariance matrix output 
+ the ordering of crime types, which is important for interpreting covariance matrix output
  as well as making sure that the order of crime types is consistent between other functions.
  samples is itself a list where each element is either a two or three dimensional array
  containing all of the samples of a given parameter. The first dimension of the array always
- corresponds to the sample/iteration. Parameter names work as follows: 
+ corresponds to the sample/iteration. Parameter names work as follows:
  \code{omega_evo} corresponds to evolution correlation matrices,
  \code{omega_error} corresponds to error correlation matrices,
  \code{sigma_evo} corresponds to a vector of evolution standard deviations,

@@ -18,7 +18,7 @@ get_states(
 
 \item{data}{The full Chicago crime dataset as given by \code{chicago}.}
 
-\item{harmonics}{An integer in 1 to 6 specifiying the number of harmonics to model seasonality. 
+\item{harmonics}{An integer in 1 to 6 specifiying the number of harmonics to model seasonality.
 Must be consistent with specification in \code{run_mcmc()}.}
 
 \item{crime_types}{Character vector specifying the types of crimes to include in the analysis.
@@ -33,10 +33,10 @@ Returns a list with two objects: state_samples and crime_types.
 state_samples is a three dimensional array where dimension one corresponds to the sample/iteration,
 dimension two corresponds to the number of time points, and dimension three corresponds to the parameter.
 Parameters are in the following order: \eqn{\mu_1,\mu_2,...,\beta_1, \beta_2,...}. The ordering of a given set of parameters,
-say \eqn{\mu}, is the ordering of the types of crimes specified by the \code{crime_types} argument. 
+say \eqn{\mu}, is the ordering of the types of crimes specified by the \code{crime_types} argument.
 After \eqn{\beta} parameters, the remainder are needed for the construction of seasonal effects.
 crime_types returns the crime_types argument specified in the function. This serves as a reminder of
-the ordering of crime types, which is important for interpreting the state_samples output 
+the ordering of crime types, which is important for interpreting the state_samples output
 as well as making sure that the order of crime types is consistent between other functions.
 }
 \description{

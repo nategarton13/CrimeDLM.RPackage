@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Nate Garton" />
+
+<meta name="date" content="2020-08-04" />
+
+<title>Example analysis of monthly robberies and burglaries in Chicago from 2012-2016</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Example analysis of monthly robberies and burglaries in Chicago from 2012-2016</h1>
+<h4 class="author">Nate Garton</h4>
+<h4 class="date">2020-08-04</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(<span class="st">&quot;ggplot2&quot;</span>)</a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw">library</span>(<span class="st">&quot;CrimeDLM.RPackage&quot;</span>)</a>
+<a class="sourceLine" id="cb1-3" title="3"><span class="kw">library</span>(<span class="st">&quot;rstan&quot;</span>)</a>
+<a class="sourceLine" id="cb1-4" title="4"><span class="co">#&gt; Loading required package: StanHeaders</span></a>
+<a class="sourceLine" id="cb1-5" title="5"><span class="co">#&gt; rstan (Version 2.21.2, GitRev: 2e1f913d3ca3)</span></a>
+<a class="sourceLine" id="cb1-6" title="6"><span class="co">#&gt; For execution on a local, multicore CPU with excess RAM we recommend calling</span></a>
+<a class="sourceLine" id="cb1-7" title="7"><span class="co">#&gt; options(mc.cores = parallel::detectCores()).</span></a>
+<a class="sourceLine" id="cb1-8" title="8"><span class="co">#&gt; To avoid recompilation of unchanged Stan programs, we recommend calling</span></a>
+<a class="sourceLine" id="cb1-9" title="9"><span class="co">#&gt; rstan_options(auto_write = TRUE)</span></a>
+<a class="sourceLine" id="cb1-10" title="10"><span class="co">#&gt; Do not specify &#39;-march=native&#39; in &#39;LOCAL_CPPFLAGS&#39; or a Makevars file</span></a>
+<a class="sourceLine" id="cb1-11" title="11"><span class="kw">library</span>(<span class="st">&quot;Rcpp&quot;</span>)</a></code></pre></div>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The purpose of this document is to provide the code to perform a limited dynamic linear model analysis of counts of monthly robberies and burglaries in Chicago from 2012-2016. Demonstrations of functions provided in <code>CrimeDLM.RPackage</code> will be given, and simultaneously we will show the basic methods by which DLM’s can be used to analyze temporal crime data.</p>
+</div>
+<div id="model" class="section level1">
+<h1>Model</h1>
+<div id="data-model" class="section level2">
+<h2>Data Model</h2>
+<p>Define <span class="math inline">\(Y_{ct}\)</span> to be the log of the number of reported incidents of crime type <span class="math inline">\(c\in \{1, \ldots, C\}\)</span> at time <span class="math inline">\(t\in \{1, \ldots, T\}\)</span>. For each crime, we assumed <span class="math inline">\(Y_{ct} = \mu_{ct} + \phi_{ct} + \epsilon_{ct}\)</span> where <span class="math inline">\(\phi_{ct}\)</span> accounts for periodicity in the data due to systematic seasonal variability and <span class="math inline">\(\mu_{ct}\)</span> smoothed (because it does not involve seasonality) mean level of (log) crime reporting. For <span class="math inline">\(\mu_{ct}\)</span> we assumed a linear trend model, i.e. <span class="math inline">\(\mu_{ct} = \mu_{c,t-1} + \beta_{c,t-1}\)</span> and <span class="math inline">\(\beta_{ct} = \beta_{c,t-1} + \delta_{ct}\)</span>, were <span class="math inline">\(\beta_{ct}\)</span> represents the difference in mean level from time <span class="math inline">\(t\)</span> to time <span class="math inline">\(t+1\)</span> and <span class="math inline">\(\delta_{ct}\)</span> represents the change in this difference from time <span class="math inline">\(t\)</span> to time <span class="math inline">\(t+1\)</span>. Lastly, <span class="math inline">\((\epsilon_{1t}, \epsilon_{2t})^{\top} \stackrel{iid}{\sim} N(0,\Sigma_{\epsilon})\)</span> and <span class="math inline">\((\delta_{1t}, \delta_{2t})^{\top} \stackrel{iid}{\sim} N(0,\Sigma_{\delta})\)</span>, where each <span class="math inline">\(\epsilon_{ct}\)</span> is independent of every <span class="math inline">\(\delta_{ct}\)</span>.</p>
+</div>
+<div id="prior" class="section level2">
+<h2>Prior</h2>
+<p>We chose to use independent <span class="math inline">\(Ca^{+}(0,1)\)</span> priors on the evolution and residual standard deviations, but we then put independent LKJ priors with parameter <span class="math inline">\(\nu = 1\)</span> on the correlation matrices for the residual and evolution vectors, <span class="math inline">\(\Omega_\epsilon\)</span> and <span class="math inline">\(\Omega_\delta\)</span>, respectively. The density function of the LKJ distribution is, up to a constant of proportionality, <span class="math inline">\(\text{Lkj}(\Sigma|\nu) \propto |\Sigma|^{\nu - 1}\)</span> where <span class="math inline">\(\nu &gt; 0\)</span>. The LKJ distribution with <span class="math inline">\(\nu = 1\)</span> is a distribution that is uniform on all correlation matrices of the given dimension. Also, the initial states were assumed to be iid <span class="math inline">\(N(0,10^7)\)</span>.</p>
+</div>
+</div>
+<div id="analysis-of-correlations-between-crimes" class="section level1">
+<h1>Analysis of correlations between crimes</h1>
+<div id="get-posterior-samples-of-covariance" class="section level2">
+<h2>Get posterior samples of covariance</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1">cov_samples &lt;-<span class="st"> </span><span class="kw">run_mcmc</span>(<span class="dt">data =</span> chicago, <span class="dt">chains =</span> <span class="dv">1</span>, <span class="dt">adapt_delta =</span> <span class="fl">0.8</span>, <span class="dt">iter =</span> <span class="dv">200</span>, <span class="dt">warmup =</span> <span class="dv">50</span>)</a>
+<a class="sourceLine" id="cb2-2" title="2"><span class="co">#&gt; Warning: The largest R-hat is NA, indicating chains have not mixed.</span></a>
+<a class="sourceLine" id="cb2-3" title="3"><span class="co">#&gt; Running the chains for more iterations may help. See</span></a>
+<a class="sourceLine" id="cb2-4" title="4"><span class="co">#&gt; http://mc-stan.org/misc/warnings.html#r-hat</span></a>
+<a class="sourceLine" id="cb2-5" title="5"><span class="co">#&gt; Warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.</span></a>
+<a class="sourceLine" id="cb2-6" title="6"><span class="co">#&gt; Running the chains for more iterations may help. See</span></a>
+<a class="sourceLine" id="cb2-7" title="7"><span class="co">#&gt; http://mc-stan.org/misc/warnings.html#bulk-ess</span></a>
+<a class="sourceLine" id="cb2-8" title="8"><span class="co">#&gt; Warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.</span></a>
+<a class="sourceLine" id="cb2-9" title="9"><span class="co">#&gt; Running the chains for more iterations may help. See</span></a>
+<a class="sourceLine" id="cb2-10" title="10"><span class="co">#&gt; http://mc-stan.org/misc/warnings.html#tail-ess</span></a></code></pre></div>
+<p>In order to understand whether there is a relationship in how robberies and burglaries trend over time, we can examine the posterior distribution of the evolution correlation.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw">ggplot</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb3-2" title="2"><span class="st">  </span><span class="kw">geom_density</span>(<span class="dt">mapping =</span> <span class="kw">aes</span>(<span class="dt">x =</span> cov_samples<span class="op">$</span>samples<span class="op">$</span>omega_evo[,<span class="dv">1</span>,<span class="dv">2</span>]), <span class="dt">fill =</span> <span class="st">&quot;blue&quot;</span>, <span class="dt">alpha =</span> <span class="fl">0.5</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb3-3" title="3"><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Evolution correlation&quot;</span>)</a></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAAAvVBMVEUAAAAAADoAAGYAOpAAZrYzMzM6AAA6ADo6AGY6kNtNTU1NTW5NTY5NbqtNjshmAABmADpmtrZmtv9uTW5uTY5ubqtuq+R1dfV/f/+OTU2OTW6OTY6OyP+QOgCQkDqQtpCQ27aQ2/+rbk2rbm6rbo6ryKur5P+2ZgC225C22/+2///Ijk3I///bkDrb/7bb/9vb///kq27k///r6+v/tmb/yI7/25D/27b/29v/5Kv//7b//8j//9v//+T////T2bzxAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAI4UlEQVR4nO3dC1vbNhQGYAUYbcJaOrqVdivr6AU2aDZoUjYC+P//rEm+X2QdyZJv0neehzbJiezojWQ7tqKwCKEMNvYLmHoAiAgAEQEgIgBEBICIMAfa1KLxgJvkOEWLJICIJICIJICIJICIJICIJICIJICIJICIJICIJICIJICKYDwaSQDlwdjpKYAUSe6TCwGomYx9MiEAAci4KIDUydQHQG3JDCgRAlA9mft0Arr/+Wv8/+1qtfrxK4Dq8T1TuX7vawsqfBIhI6Droy9JC3r6dAEgVRd7eMe7WNyIfuChKjC7YG+LkFPoAN2/vii1InfvtDctKI58O+SuIgCaPFDZJxbqBvT9xbfo6bOPu3kXQOKPHwcd5TsydxWZP5A03FUEQFMHqvoIIQAByKQogIgkgIgkgNTJug+AaskG0CkDEIAMigJInWz6AKiSBBCRlADlgxgAtAEQmZQBoYsBSL8ogNRJmQ+ANgDSLgogIgkgdVLqA6ANgHSLAohIAohIAkidlPs4AfIjyiOnSiF5ovGi3b3TnrYgdxUBEIDsKgIgANlVZESgFh8AbQCkVxRARBJA6mSbD4A2ANIqCiAiCSAiCSAiCSAiCSB1stUHQBsA6RQFEJEEkDrZ7gOgDYA0igIIQADqtSiAAGRVVOEDoA2A6KIOgbLJTR7erV58A1Ajsim6nj6+j25f+gKk8jEDyqfoevjta2mmHHcVmTtQMQPVL9+ih1/F9C8+TNHVMras0wiz0vxBCZAId++0hy3IAyD21j2QV9ugPoCePr7xZy/mHEj8+XQcZAO0O16cq7yCB4qiS8b2b7wGYqeWXWx3zNgSQKptkCDauwJQC9CasQPe1RQdzV1F5gf0eMbYibixVTQhdxUZAYgfRlvtxVRdC0AciGw+AAJQtowG0JplcYAupmxBRLiryPBA4lSHy89iACoB8eYjDhFF+LsNQgtSZ+OTiQDqESjpZsTRoruKzA/o8iBa712tvd3N2wLxBvR4duDvgWJyPcMOaHe8BFCyDAnQ49lyuzgXHQ1A8m3Q3SH/mKE6FzRroPSKIXbzAOpWNLvkbNnF/P2o4QBI7OPRgrJlSIC8Pt3BnLQgn4FO7YGoQ8Q5AxWjgqy6mM75oHmGclwZ5jBz1II8BiqNu7MCWjN2svbwo0Z5XKLV+aD9v5MzHgBqP91x4uHpjsrAVgA1stWBvzZdbC26mDhn5hMQqw2MttpIb8VhkNpnZkCs7oPdfCnLmjwAyrJMqmMBlH3O8ON8UAuObQtaCxrqpIe7ivQG1K5jB+TJACpF6wHQJm4+SgMHXWzWx0GMGkRmfxxEnFZ0Z9APEGUQ+G6eHp8QNpDG1eWggRiAlEmmc3U5aCAdg4CB9C59hQvEAKROal7ZCRZI98oOgAAkTWpf2QkUSP/KDoAAJEmyMYCKGTtuV6t0tq7JAukbOAMqzVx2/X7iLcjk2qAzoGLWoKdPF6XH3Rk4AzK6eOoMqJh3ive11SpuRBOdw0xz+JjjEWbFzGX3ry9KrchdI3HXgkwaSQ8tKI58O+TOwBVQ4yrP0NugiQMZXn53uBfLZi4Tne3p82R382MBpcdBohHx46CjvK+5M3ADZDqAI7gjacl1ZgCVkrLr8AACkHZR8zFSYQF1GEQWGJC5QVBALSOlAAQgvaJtQ+0AlCRbxyICKAXqZBAOUMeh0AEBdTMIBkgxGBpAAKKLdv62QSBA3b9tACAAbYjfnwEQ8dsPACK+zxM8EPWFp9CByC88BQ9E1TJwIPoLT2EDaXyfJ2ggne/zjAw0ZjB3Q6XsB1C1RX8tKJnWQFFU8+sqXnaxYiKJDKlZtHQKMTCgxlQAAknSvjRr6RuQfKaEcm9rPikkoLZz729Ps02SZCKXcIDISxPyWW5CAVJNQ9K9lt4AqadpCR6ImMUmeKAeT+p4AJS0HgDJk/l+CUCSZHmvDaDmx63KhhlARVI6qyGAsoPllh06gBQ4fdZyNkBKnR5rOQ+gRGeUWk4fiOkd6oQJVN1fAai2J3f3DXaPgJiUZsRaTgioFcb+pXoBRH8mDxzI8tUACEB2rwZAALJ7NXMHKqboKm4BqIhiiq7SZF0AKjWgfHqc6kQ5AEqjmGCpuDXRKbr6DJ0puopbIja1GHgQZ79FbVsQgEqhsQ1y9momU9RsL/Ym34u9ke/FnL2ayRTtcBwkmk7bcZCzVzOZouNfetZOAghAdkkAAcguOV8go7D4YDJK0WZJABElAUSUBBBRcl5fqBshAEQEgIgAEBEAIqI3oJbfdTEpWDnL0us6eWRnBOsr7Quo7XddDApWrzb1uU4e31PPxkr7Amr7XReDgrWfZehxnRz06EuypsZK+wKS/a6LYcHaD3v0uM64cKLSWGlfQG2/62JQsHq1qc91ikiBGivtA+h6tXrZ9rsuZDhpQYbrjAsP3ILaftfFoKDFNshwnSLuB94Gtf2ui0HB6tWmPtcpIlVprLTn46DG77qYFOx4HNRhnVECJFspjqSJABARACICQEQAiAgAETEE0ONZ8nWgvata4u7ZeX77378qd43C1XJkMQzQUp4o1cSqUq6WIwsAETEoUHJjvXclOt1BXJu4QnfPPhwythS384x45CQrFj+W557/zvb+FP/Ey+EdVxS848/ni1Atp1MM24LW+zfi3uPZQST+CqD4f/6XZw75M9fJRkvc3x2fREVO1Fz8I+6JZfKC4gmigGI53WLIjfQySl/+VrzibVybGlCeOTzJu0vWa6o58U/8CKfhz/jvJqKW0y2GbUHiFn/Ht/xtTWtTByoyecW2aQNo5tYpfHxny28tVMvpFgNvpLf7//A7zoDEI1F8Z3e8OCeW0y0GBtq9+vD8Ktouztu6WJFpdrFGLn4keUYssl2oltMtht7NX7J045pupHfHS35zEW9kyxvXUsWyx5q5xzPOkqgIkbtD5XK6xZAb6fhdjfe5xW4+3j3/9OpcyFV2z6WK1XfzRU48knQtXp4t/uA6iuV0CnwWIwJARACICAARASAiAEQEgIgAEBEAIgJARPwPlVkhqaNodE0AAAAASUVORK5CYII=" /><!-- --></p>
+<p>Similarly, we can seek to understand if, on a month to month basis, under or over prediction of robberies and burglaries coincide. This we can do by examining the posterior distribution of the error correlations.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw">ggplot</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-2" title="2"><span class="st">  </span><span class="kw">geom_density</span>(<span class="dt">mapping =</span> <span class="kw">aes</span>(<span class="dt">x =</span> cov_samples<span class="op">$</span>samples<span class="op">$</span>omega_error[,<span class="dv">1</span>,<span class="dv">2</span>]), <span class="dt">fill =</span> <span class="st">&quot;red&quot;</span>, <span class="dt">alpha =</span> <span class="fl">0.5</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-3" title="3"><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Error correlation&quot;</span>)</a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+</div>
+<div id="get-posterior-samples-of-the-states" class="section level1">
+<h1>Get posterior samples of the states</h1>
+<p>Now we must sample the latent states. It is important that the order of the crime types given in the <code>run_mcmc()</code> function matches that of future functions.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">state_samples &lt;-<span class="st"> </span><span class="kw">get_states</span>(<span class="dt">mcmc_samples =</span> cov_samples<span class="op">$</span>samples, <span class="dt">data =</span> chicago, <span class="dt">crime_types =</span> cov_samples<span class="op">$</span>crime_types)</a></code></pre></div>
+</div>
+<div id="analysis-of-the-smoothed-time-series-means" class="section level1">
+<h1>Analysis of the smoothed time series means</h1>
+<p>We have an idea of the relationship between monthly burglaries and robberies over this time period, but we would like to know what the trends for each of these crimes actually look like. We can do this by plotting the smoothed time series means. These correspond to the <span class="math inline">\(\mu_{ct}\)</span> parameters in the model. We also plot 95% pointwise credible intervals.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">smoothmeans &lt;-<span class="st"> </span><span class="kw">get_smoothmeans</span>(<span class="dt">states =</span> state_samples<span class="op">$</span>state_samples, <span class="dt">crime_types =</span> state_samples<span class="op">$</span>crime_types)</a>
+<a class="sourceLine" id="cb6-2" title="2"></a>
+<a class="sourceLine" id="cb6-3" title="3"><span class="co">## create data frame for plotting </span></a>
+<a class="sourceLine" id="cb6-4" title="4">df &lt;-<span class="st"> </span><span class="kw">expand.grid</span>(<span class="kw">unique</span>(chicago<span class="op">$</span>month), <span class="kw">c</span>(<span class="dv">2012</span><span class="op">:</span><span class="dv">2016</span>),<span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb6-5" title="5">df<span class="op">$</span>date &lt;-<span class="st"> </span><span class="kw">as.Date</span>(<span class="kw">paste</span>(df[,<span class="dv">1</span>],df[,<span class="dv">2</span>],<span class="dv">15</span>, <span class="dt">sep =</span> <span class="st">&quot;-&quot;</span>), <span class="dt">format =</span> <span class="st">&quot;%b-%Y-%d&quot;</span>)</a>
+<a class="sourceLine" id="cb6-6" title="6">df &lt;-<span class="st"> </span><span class="kw">rbind</span>(df,df)</a>
+<a class="sourceLine" id="cb6-7" title="7">df<span class="op">$</span>type &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="kw">c</span>(state_samples<span class="op">$</span>crime_types), <span class="dt">each =</span> <span class="kw">nrow</span>(df)<span class="op">/</span><span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb6-8" title="8">df<span class="op">$</span>mean &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">apply</span>(<span class="dt">X =</span> smoothmeans<span class="op">$</span>smoothmeans[,<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> mean), <span class="kw">apply</span>(<span class="dt">X =</span> smoothmeans<span class="op">$</span>smoothmeans[,<span class="op">-</span><span class="dv">61</span>,<span class="dv">2</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> mean))</a>
+<a class="sourceLine" id="cb6-9" title="9">df<span class="op">$</span>lower &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">apply</span>(<span class="dt">X =</span> smoothmeans<span class="op">$</span>smoothmeans[,<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> quantile, <span class="dt">probs =</span> <span class="fl">0.025</span>), <span class="kw">apply</span>(<span class="dt">X =</span> smoothmeans<span class="op">$</span>smoothmeans[,<span class="op">-</span><span class="dv">61</span>,<span class="dv">2</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> quantile, <span class="dt">probs =</span> <span class="fl">0.025</span>))</a>
+<a class="sourceLine" id="cb6-10" title="10">df<span class="op">$</span>upper &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">apply</span>(<span class="dt">X =</span> smoothmeans<span class="op">$</span>smoothmeans[,<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> quantile, <span class="dt">probs =</span> <span class="fl">0.975</span>), <span class="kw">apply</span>(<span class="dt">X =</span> smoothmeans<span class="op">$</span>smoothmeans[,<span class="op">-</span><span class="dv">61</span>,<span class="dv">2</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> quantile, <span class="dt">probs =</span> <span class="fl">0.975</span>))</a>
+<a class="sourceLine" id="cb6-11" title="11"></a>
+<a class="sourceLine" id="cb6-12" title="12"><span class="kw">ggplot</span>(df) <span class="op">+</span></a>
+<a class="sourceLine" id="cb6-13" title="13"><span class="st">  </span><span class="kw">geom_ribbon</span>(<span class="kw">aes</span>(<span class="dt">x=</span>date, <span class="dt">ymin =</span> <span class="kw">exp</span>(lower), <span class="dt">ymax =</span> <span class="kw">exp</span>(upper), <span class="dt">fill =</span> type), <span class="dt">alpha =</span> <span class="fl">0.5</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb6-14" title="14"><span class="st">  </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> date, <span class="dt">y =</span> <span class="kw">exp</span>(mean), <span class="dt">colour =</span> type), <span class="dt">size =</span> <span class="fl">1.3</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb6-15" title="15"><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Crime count&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb6-16" title="16"><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Date&quot;</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb6-17" title="17"><span class="st">  </span><span class="kw">scale_x_date</span>(<span class="dt">labels =</span> <span class="kw">date_format</span>(<span class="st">&quot;%b&quot;</span>), <span class="dt">date_breaks =</span> <span class="st">&quot;1 year&quot;</span>, <span class="dt">date_labels =</span> <span class="st">&quot;%b-%Y&quot;</span>)</a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="analysis-of-seasonality" class="section level1">
+<h1>Analysis of seasonality</h1>
+<p>It may also be of interest to examine and compare any periodicity in the behavior of crime time series. The seasonal effects correspond to the <span class="math inline">\(\phi_{ct}\)</span> parameters in the model. We plot the estimated posterior means as well as 95% pointwise credible intervals.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">seasonality &lt;-<span class="st"> </span><span class="kw">get_seasonality</span>(<span class="dt">states =</span> state_samples<span class="op">$</span>state_samples, <span class="dt">harmonics =</span> <span class="dv">4</span>, <span class="dt">crime_types =</span> state_samples<span class="op">$</span>crime_types)</a>
+<a class="sourceLine" id="cb7-2" title="2"></a>
+<a class="sourceLine" id="cb7-3" title="3">df_seasonality &lt;-<span class="st"> </span>df[<span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">12</span>,<span class="dv">61</span><span class="op">:</span><span class="dv">72</span>),<span class="dv">3</span><span class="op">:</span><span class="dv">4</span>]</a>
+<a class="sourceLine" id="cb7-4" title="4">df_seasonality<span class="op">$</span>mean &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">apply</span>(<span class="dt">X =</span> seasonality<span class="op">$</span>seasonal_effects[,<span class="kw">c</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">13</span>),<span class="dv">1</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> mean), <span class="kw">apply</span>(<span class="dt">X =</span> seasonality<span class="op">$</span>seasonal_effects[,<span class="kw">c</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">13</span>),<span class="dv">2</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> mean))</a>
+<a class="sourceLine" id="cb7-5" title="5">df_seasonality<span class="op">$</span>lower &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">apply</span>(<span class="dt">X =</span> seasonality<span class="op">$</span>seasonal_effects[,<span class="kw">c</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">13</span>),<span class="dv">1</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> quantile, <span class="dt">probs =</span> <span class="fl">0.025</span>), <span class="kw">apply</span>(<span class="dt">X =</span> seasonality<span class="op">$</span>seasonal_effects[,<span class="kw">c</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">13</span>),<span class="dv">2</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> quantile, <span class="dt">probs =</span> <span class="fl">0.025</span>))</a>
+<a class="sourceLine" id="cb7-6" title="6">df_seasonality<span class="op">$</span>upper &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">apply</span>(<span class="dt">X =</span> seasonality<span class="op">$</span>seasonal_effects[,<span class="kw">c</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">13</span>),<span class="dv">1</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> quantile, <span class="dt">probs =</span> <span class="fl">0.975</span>), <span class="kw">apply</span>(<span class="dt">X =</span> seasonality<span class="op">$</span>seasonal_effects[,<span class="kw">c</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">13</span>),<span class="dv">2</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> quantile, <span class="dt">probs =</span> <span class="fl">0.975</span>))</a>
+<a class="sourceLine" id="cb7-7" title="7"></a>
+<a class="sourceLine" id="cb7-8" title="8"><span class="kw">ggplot</span>(df_seasonality) <span class="op">+</span></a>
+<a class="sourceLine" id="cb7-9" title="9"><span class="st">  </span><span class="kw">geom_ribbon</span>(<span class="kw">aes</span>(<span class="dt">x =</span> date, <span class="dt">ymin =</span> <span class="kw">exp</span>(lower), <span class="dt">ymax =</span> <span class="kw">exp</span>(upper), <span class="dt">fill =</span> type), <span class="dt">alpha =</span> <span class="fl">0.5</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb7-10" title="10"><span class="st">  </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> date, <span class="dt">y =</span> <span class="kw">exp</span>(mean), <span class="dt">colour =</span> type), <span class="dt">size =</span> <span class="fl">1.3</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb7-11" title="11"><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Multiplicative effect </span><span class="ch">\n</span><span class="st"> on crime count&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb7-12" title="12"><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Month&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb7-13" title="13"><span class="st">  </span><span class="kw">scale_x_date</span>(<span class="dt">labels =</span> <span class="kw">date_format</span>(<span class="st">&quot;%b&quot;</span>), <span class="dt">date_breaks =</span> <span class="st">&quot;1 month&quot;</span>, <span class="dt">date_labels =</span> <span class="st">&quot;%b&quot;</span>)</a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="estimated-time-series-means-smoothed-means-seasonality" class="section level1">
+<h1>Estimated time series means (smoothed means + seasonality)</h1>
+<p>The estimated, non-smoothed, time series means may also be of interest.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1">ts_means &lt;-<span class="st"> </span><span class="kw">get_means</span>(<span class="dt">states =</span> state_samples<span class="op">$</span>state_samples, <span class="dt">harmonics =</span> <span class="dv">4</span>, <span class="dt">crime_types =</span> state_samples<span class="op">$</span>crime_types)</a>
+<a class="sourceLine" id="cb8-2" title="2"></a>
+<a class="sourceLine" id="cb8-3" title="3">df_means &lt;-<span class="st"> </span>df[,<span class="dv">3</span><span class="op">:</span><span class="dv">4</span>]</a>
+<a class="sourceLine" id="cb8-4" title="4">df_means<span class="op">$</span>mean &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">apply</span>(<span class="dt">X =</span> ts_means<span class="op">$</span>ts_means[,<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> mean), <span class="kw">apply</span>(<span class="dt">X =</span> ts_means<span class="op">$</span>ts_means[,<span class="op">-</span><span class="dv">61</span>,<span class="dv">2</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> mean))</a>
+<a class="sourceLine" id="cb8-5" title="5">df_means<span class="op">$</span>lower &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">apply</span>(<span class="dt">X =</span> ts_means<span class="op">$</span>ts_means[,<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> quantile, <span class="dt">probs =</span> <span class="fl">0.025</span>), <span class="kw">apply</span>(<span class="dt">X =</span> ts_means<span class="op">$</span>ts_means[,<span class="op">-</span><span class="dv">61</span>,<span class="dv">2</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> quantile, <span class="dt">probs =</span> <span class="fl">0.025</span>))</a>
+<a class="sourceLine" id="cb8-6" title="6">df_means<span class="op">$</span>upper &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">apply</span>(<span class="dt">X =</span> ts_means<span class="op">$</span>ts_means[,<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> quantile, <span class="dt">probs =</span> <span class="fl">0.975</span>), <span class="kw">apply</span>(<span class="dt">X =</span> ts_means<span class="op">$</span>ts_means[,<span class="op">-</span><span class="dv">61</span>,<span class="dv">2</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> quantile, <span class="dt">probs =</span> <span class="fl">0.975</span>))</a>
+<a class="sourceLine" id="cb8-7" title="7"></a>
+<a class="sourceLine" id="cb8-8" title="8"><span class="kw">ggplot</span>(df_means) <span class="op">+</span></a>
+<a class="sourceLine" id="cb8-9" title="9"><span class="st">  </span><span class="kw">geom_ribbon</span>(<span class="kw">aes</span>(<span class="dt">x=</span>date, <span class="dt">ymin =</span> <span class="kw">exp</span>(lower), <span class="dt">ymax =</span> <span class="kw">exp</span>(upper), <span class="dt">fill =</span> type), <span class="dt">alpha =</span> <span class="fl">0.5</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb8-10" title="10"><span class="st">  </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">x =</span> date, <span class="dt">y =</span> <span class="kw">exp</span>(mean), <span class="dt">colour =</span> type), <span class="dt">size =</span> <span class="fl">1.3</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb8-11" title="11"><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Crime count&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb8-12" title="12"><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Date&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb8-13" title="13"><span class="st">  </span><span class="kw">scale_x_date</span>(<span class="dt">labels =</span> <span class="kw">date_format</span>(<span class="st">&quot;%b&quot;</span>), <span class="dt">date_breaks =</span> <span class="st">&quot;1 year&quot;</span>, <span class="dt">date_labels =</span> <span class="st">&quot;%b-%Y&quot;</span>)</a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
