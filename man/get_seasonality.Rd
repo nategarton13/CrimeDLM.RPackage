@@ -4,8 +4,7 @@
 \alias{get_seasonality}
 \title{Function to compute the estimated seasonal time series components.}
 \usage{
-get_seasonality(states, harmonics = 4, crime_types = c("burglary",
-  "robbery"))
+get_seasonality(states, harmonics = 4, crime_types = c("burglary", "robbery"))
 }
 \arguments{
 \item{states}{A three dimensional array of sampled states such as that given by \code{get_states}.}

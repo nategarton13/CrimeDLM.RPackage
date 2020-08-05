@@ -4,8 +4,14 @@
 \alias{get_states}
 \title{Function to sample the latent states given sampled covariance matrices.}
 \usage{
-get_states(mcmc_samples, data, harmonics = 4, crime_types = c("burglary",
-  "robbery"), initial_year = 2012, final_year = 2016)
+get_states(
+  mcmc_samples,
+  data,
+  harmonics = 4,
+  crime_types = c("burglary", "robbery"),
+  initial_year = 2012,
+  final_year = 2016
+)
 }
 \arguments{
 \item{mcmc_samples}{A list of parameter samples with the same names and classes as those produced by \code{run_mcmc}.}

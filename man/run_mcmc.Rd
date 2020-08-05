@@ -4,9 +4,17 @@
 \alias{run_mcmc}
 \title{Function to sample observation and state covariance parameters.}
 \usage{
-run_mcmc(data, harmonics = 4, chains = 3, iter = 2000, warmup = 1000,
-  adapt_delta = 0.9, crime_types = c("burglary", "robbery"),
-  initial_year = 2012, final_year = 2016)
+run_mcmc(
+  data,
+  harmonics = 4,
+  chains = 3,
+  iter = 2000,
+  warmup = 1000,
+  adapt_delta = 0.9,
+  crime_types = c("burglary", "robbery"),
+  initial_year = 2012,
+  final_year = 2016
+)
 }
 \arguments{
 \item{data}{The full Chicago crime dataset as given by \code{chicago}.}

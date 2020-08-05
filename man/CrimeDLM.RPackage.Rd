@@ -3,8 +3,4 @@
 \docType{package}
 \name{CrimeDLM.RPackage}
 \alias{CrimeDLM.RPackage}
-\alias{CrimeDLM.RPackage-package}
 \title{CrimeDLM.RPackage.}
-\description{
-CrimeDLM.RPackage.
-}
